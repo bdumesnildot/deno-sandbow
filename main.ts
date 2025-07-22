@@ -1,18 +1,10 @@
 import { Hono } from "hono"
-import { Axios } from "axios"
 import { encodeBase64 } from "jsr:@std/encoding/base64"
 
 const forwardUrl = Deno.env.get("FORWARD_URL")
-const appUrl = Deno.env.get("APP_URL")
 const appPort = Deno.env.get("APP_PORT")
 
 const app = new Hono()
-const httpClient = new Axios({
-  baseURL: appUrl,
-  headers: {
-    "Content-Type": "application/json",
-  },
-})
 
 app.get("/", (c) => c.text("Hello Deno!"))
 
@@ -29,11 +21,23 @@ app.post("/webhooks", async (c) => {
 
   if (forwardUrl) {
     try {
+      const forwardedData = {
+        initialRequest: reqJson,
+        buffer,
+        bufferAsString: loggedBufferAsString,
+        bufferToLog: bufferToLog,
+      }
+
       // Forward the request to the specified URL
-      await httpClient.post(forwardUrl, {
-        message: "Webhook forwarded",
+      const resp = await fetch(forwardUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(forwardedData),
       })
-      console.log("Webhook forwarded successfully")
+
+      console.log("Webhook forwarded successfully", resp)
     } catch (error) {
       console.error("Error forwarding webhook:", error)
       return c.json({ error: "Failed to forward webhook" }, 500)
