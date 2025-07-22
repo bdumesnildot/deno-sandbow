@@ -19,17 +19,19 @@ app.get("/", (c) => c.text("Hello Deno!"))
 app.post("/webhooks", async (c) => {
   // Extract buffer and stringify the hex value for debugging
   const buffer = await c.req.arrayBuffer()
+  const reqJson = await c.req.json()
   const bufferToLog = new Uint8Array(buffer)
 
   const loggedBufferAsString = encodeBase64(bufferToLog)
 
+  console.log("Received webhook JSON:", JSON.stringify(reqJson, null, 2))
   console.log("Received webhook buffer:", loggedBufferAsString)
 
   if (forwardUrl) {
     try {
       // Forward the request to the specified URL
       await httpClient.post(forwardUrl, {
-        initialRequest: c.req.json(),
+        initialRequest: reqJson,
         buffer,
       })
       console.log("Webhook forwarded successfully")
@@ -42,8 +44,6 @@ app.post("/webhooks", async (c) => {
   return c.json(
     {
       message: "Webhook received",
-      bufferEncoded: loggedBufferAsString,
-      buffer: bufferToLog,
     },
     200
   )
@@ -55,3 +55,5 @@ Deno.serve(
   },
   app.fetch
 )
+
+JSON.stringify({ hello: "world" }, null, 4)
