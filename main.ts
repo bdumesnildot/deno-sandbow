@@ -31,7 +31,7 @@ app.post("/webhooks", async (c) => {
     try {
       // Forward the request to the specified URL
       await httpClient.post(forwardUrl, {
-        initialRequest: reqJson,
+        initialRequest: JSON.stringify(reqJson, null, 2),
         buffer,
       })
       console.log("Webhook forwarded successfully")
