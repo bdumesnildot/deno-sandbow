@@ -16,7 +16,8 @@ app.post("/webhooks", async (c) => {
 
   const loggedBufferAsString = encodeBase64(bufferToLog)
 
-  console.log("Received webhook JSON:", JSON.stringify(reqJson, null, 2))
+  console.log("Received webhook JSON:", JSON.stringify(reqJson, null, 0))
+  console.log("Received webhook headers:", c.req.header())
   console.log("Received webhook buffer:", loggedBufferAsString)
 
   if (forwardUrl) {
