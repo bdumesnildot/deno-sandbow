@@ -22,7 +22,12 @@ app.post("/webhooks", async (c) => {
   if (forwardUrl) {
     try {
       const forwardedData = {
-        initialRequest: reqJson,
+        initialRequest: {
+          headers: c.req.header(),
+          method: c.req.method,
+          url: c.req.url,
+          body: reqJson,
+        },
         buffer,
         bufferAsString: loggedBufferAsString,
         bufferToLog: bufferToLog,
